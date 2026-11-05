@@ -26,6 +26,10 @@ const CONSUMERS = [
   "skills/ce-promote/references/spiral-cli.md",
   "skills/ce-code-review/references/cross-model-review.md",
   "skills/ce-doc-review/references/cross-model-review.md",
+  // The round-count default (`doc_review_rounds`, `work_review_rounds`) is read in the reference each
+  // skill reads first, before its review loop can start.
+  "skills/ce-doc-review/references/modes.md",
+  "skills/ce-work/references/input-triage.md",
 ]
 
 const START = "<!-- ce-config-layers:start -->"

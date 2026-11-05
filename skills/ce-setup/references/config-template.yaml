@@ -135,6 +135,20 @@
 # cross_model_model: fable         # model alias or full id for the resolved peer target (no default)
 # cross_model_effort: xhigh        # reasoning effort for the resolved peer target (no default)
 
+# --- Review rounds ---
+# Opt-in review loop. A round is a full review followed by triage and fixes; the
+# loop repeats until a review has no blocking finding (P0 or P1), the findings
+# are all disputed, or the round count is reached. Each round goes through the
+# same cross-model pass, disclosure, and cross_model_review_mode as a single
+# review, so every round sends content to the peer. Unset means no loop. A
+# `rounds:N` argument for one run wins over these keys; `rounds:0` turns the
+# loop off for that run. Values are integers 0 to 5; anything else is ignored.
+# History rewriting (fixup folding) has no config key: ce-work takes it only from
+# the `fixups:on` argument on a run that also resolves a round count.
+#
+# doc_review_rounds: 2           # 0-5 (default: unset -- no loop); ce-doc-review, including when ce-plan and ce-brainstorm call it
+# work_review_rounds: 3          # 0-5 (default: unset -- no loop); ce-work's shipping review step
+
 # --- ce-work implementation engine ---
 # Standing preferences for who authors implementation units. Live
 # task/session/project instructions and LFG's provenance-bearing binding may
