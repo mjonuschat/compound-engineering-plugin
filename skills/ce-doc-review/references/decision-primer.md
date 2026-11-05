@@ -1,6 +1,6 @@
 # Decision primer — round 2+
 
-Read this file at Phase 2 (dispatch) only when the current interactive session has already completed at least one review round. Round 1 uses the inline `<prior-decisions>` block in `references/dispatch.md` and does not need this file.
+Read this file at Phase 2 (dispatch) only when the current run has already completed at least one review round, whether the user decided it interactively or the loop in `references/review-rounds.md` triaged it. Round 1 uses the inline `<prior-decisions>` block in `references/dispatch.md` and does not need this file.
 
 The primer tells each persona what the user already decided, so round N+1 neither reports rejected findings again nor assumes an applied fix landed correctly.
 
@@ -44,4 +44,4 @@ Applied findings stay on the applied list so round-N+1 personas can verify the f
 
 ## Scope
 
-Decisions do not persist across sessions. A later review of the same document starts at round 1 with no primer carried over, even if prior sessions deferred findings into the document's Open Questions section.
+Decisions do not persist across sessions or runs. A later review of the same document starts at round 1 with no primer carried over, even if prior sessions deferred findings into the document's Open Questions section.

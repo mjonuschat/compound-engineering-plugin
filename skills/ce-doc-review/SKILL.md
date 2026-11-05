@@ -1,7 +1,7 @@
 ---
 name: ce-doc-review
 description: Review requirements, plans, or specs with role-specific lenses. Use when the user wants to improve an existing planning document.
-argument-hint: "[mode:non-interactive] [path/to/document.{md,html}]"
+argument-hint: "[mode:non-interactive] [rounds:N] [path/to/document.{md,html}]"
 ---
 
 # Document Review
@@ -14,7 +14,7 @@ Reviewer personas supply evidence; the judgment is yours. Check their claims aga
 
 ## Interactive mode rules
 
-**Read `references/modes.md` before anything else.** It defines how the mode is detected, the non-interactive argument contract, and the question-tool rules: match the host's blocking question tool already in the current tool list (never call a user-facing question tool to discover it), pre-load it at the top of the interactive flow if it is listed but unloaded, and fall back to a numbered list only when the harness genuinely lacks one.
+**Read `references/modes.md` before anything else.** It defines how the mode and `rounds:N` are detected, the non-interactive argument contract, and the question-tool rules: match the host's blocking question tool already in the current tool list (never call a user-facing question tool to discover it), pre-load it at the top of the interactive flow if it is listed but unloaded, and fall back to a numbered list only when the harness genuinely lacks one.
 
 Either way, a question that calls for a user decision calls the tool or falls back loudly. Narrating it as plain text is a bug.
 

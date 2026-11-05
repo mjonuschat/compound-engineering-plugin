@@ -47,6 +47,9 @@ A path, no path, or non-interactive. Markdown and HTML plans use the same review
 
 # Deprecated alias for the same non-interactive contract
 /ce-doc-review mode:headless docs/plans/notification-mute.md
+
+# Review, triage, fix, and review again, up to 3 rounds
+/ce-doc-review rounds:3 docs/plans/notification-mute.md
 ```
 
 For HTML, edits preserve the artifact's existing structure and never insert markdown syntax.
@@ -119,7 +122,7 @@ The output is one consolidated set, not every persona's raw list.
 
 ### Decision primer
 
-When you run multiple rounds in the same session, the primer carries forward what was applied vs rejected:
+When you run multiple rounds in the same session, or the review loop runs them, the primer carries forward what was applied vs rejected:
 
 - Applied findings flow back so the next round can verify the fix landed
 - Rejected findings (skip / defer / acknowledge) are suppressed by fingerprint plus evidence-substring overlap, so the same issue does not re-surface
@@ -228,10 +231,19 @@ Skip `ce-doc-review` when:
 
 ---
 
+### Review rounds
+
+`rounds:N` (or `doc_review_rounds` in the CE config) repeats the review until it converges. Each round is a full review of the whole document. The agent then triages each blocking finding itself. Blocking means `P0` or `P1`. It fixes what is real and reachable, disputes what is theoretical or unreproducible with a reason, and never edits for a `P2` or `P3` finding. Fixes are edits to the document in place, and nothing is committed.
+
+Its own decisions feed the decision primer for the next round, so a disputed finding is not argued twice. The loop stops when a round has no blocking finding (clean), when every blocking finding was disputed or a disputed one comes back or only speculative ones remain (converged), or when the count is reached (exhausted). The last round's fixes are not re-reviewed, and the report says so. The closing report gives the rounds run, why it ended, fixed, disputed, and deferred counts, and any blocking finding left for you to decide.
+
+Each round goes through the same cross-model pass as a single review, with the same disclosure, so every round sends the document to the peer. The peer starts fresh each round and carries no memory of earlier ones; resuming one peer session across rounds is a possible follow-up. Under `mode:non-interactive` the loop runs inside the one call, so `ce-plan` and `ce-brainstorm` need no change, and `doc_review_rounds` applies to their runs too.
+
 ## Reference
 
 | Argument | Effect |
 |----------|--------|
+| `rounds:N` | Opt in to the review loop, `N` from 0 to 5. Wins over `doc_review_rounds`; `0` turns the loop off for the run |
 | _(empty, interactive)_ | Asks which doc to review, or auto-finds the most recent file under the project's plans directory |
 | `<doc path>` | Reviews that specific doc. Interactive unless a mode token is also present |
 | `mode:non-interactive <doc path>` | Non-interactive mode. Structured text output, no prompts. Requires a path. Deprecated alias: `mode:headless` |

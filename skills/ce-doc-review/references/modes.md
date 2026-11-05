@@ -8,7 +8,7 @@
 
 ## Phase 0: Detect Mode
 
-Arguments may contain a document path, a mode token, or both; both tokens together is not a conflict. Tokens starting with `mode:` are flags, not paths — strip them, and use any remaining token as the document path for Phase 1 (getting the document). `depth:full` is also a flag: strip it and pass it to `references/depth.md`.
+Arguments may contain a document path, a mode token, or both; both tokens together is not a conflict. Tokens starting with `mode:` are flags, not paths — strip them, and use any remaining token as the document path for Phase 1 (getting the document). `depth:full` is also a flag: strip it and pass it to `references/depth.md`. `rounds:N` is a flag too (see Review rounds below).
 
 `mode:non-interactive` (or its deprecated alias `mode:headless`) sets **non-interactive mode**. This mode changes how the findings that were not applied are delivered; it does not change how findings are classified. Use the same judgment about which tier each finding belongs in:
 
@@ -19,4 +19,18 @@ Arguments may contain a document path, a mode token, or both; both tokens togeth
 
 **Non-interactive argument contract:** `mode:non-interactive <document-path>`, for example `mode:non-interactive <path-to-doc>.{md,html}`. `mode:headless` is a deprecated alias for the same contract.
 
-Absent either token, run interactive, with the routing question, walk-through, and bulk-preview behaviors documented in `references/walkthrough.md` and `references/bulk-preview.md`.
+Absent either mode token, run interactive, with the routing question, walk-through, and bulk-preview behaviors documented in `references/walkthrough.md` and `references/bulk-preview.md`.
+
+## Review rounds
+
+`rounds:N` is also a flag: strip it. Resolve the round count for this run from the first of these that is an integer 0 to 5 (0 means no loop): the `rounds:N` argument (0 turns the loop off for this run), then `doc_review_rounds` from the CE config, then none. A value outside 0 to 5 is invalid; ignore it, say so in one line, and continue to the next source. Read the key as follows:
+
+<!-- ce-config-layers:start -->
+**Resolve ordinary CE yaml keys from the two repo files.**
+
+- **Read** `<repo-root>/.compound-engineering/config.local.yaml`, then `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`). Missing files are skipped. Gitignore does not change resolution.
+- **Win** with the first active (non-commented) value. For scalars, empty is unset; an invalid value continues to the next layer, then the skill default. For lists and maps, a present key — including an empty list or map — replaces the whole key.
+- **Do not** use this rule for `docs_root` — that key is `config.yaml` only.
+<!-- ce-config-layers:end -->
+
+When the resolved count is 1 or more, read `references/review-rounds.md` before Phase 2. With none, or 0, no round loop runs.

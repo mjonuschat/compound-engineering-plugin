@@ -34,7 +34,7 @@ Each subagent receives the subagent template, by path or inlined as above. On th
 | `{decision_primer}` | Round 1: the block below. Round 2+: read `references/decision-primer.md` and render per that file. |
 | `{pack_constraints}` | Resolved Compound Pack roots, when the repo declares any (see below). Empty string otherwise. |
 
-On round 1 — no prior decisions in this interactive session — set `{decision_primer}` to:
+On round 1 — no prior decisions in this run — set `{decision_primer}` to:
 
 ```
 <prior-decisions>

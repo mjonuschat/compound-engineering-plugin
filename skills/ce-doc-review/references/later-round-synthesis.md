@@ -1,6 +1,6 @@
 # Later-round synthesis rules — round 2+
 
-Read this file at Phase 3 (synthesis) only when the current session carries decisions from an earlier review round of the same document: a decision primer rendered from `references/decision-primer.md`, or decision state retained by a resume (`references/document-intake.md`). A first review round does not need this file.
+Read this file at Phase 3 (synthesis) only when the current run carries decisions from an earlier review round of the same document (the user's, or the round loop's own triage): a decision primer rendered from `references/decision-primer.md`, or decision state retained by a resume (`references/document-intake.md`). A first review round does not need this file.
 
 ## R29 Rejected-Finding Suppression (Round 2+)
 

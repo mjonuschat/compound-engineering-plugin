@@ -269,6 +269,8 @@ Deferred questions:
 Recorded in the document: N items under Deferred / Open Questions
 Not recorded in the document: N items (<reason>)
 
+Review rounds: <the report references/review-rounds.md defines; omit unless rounds ran>
+
 Coverage: <what limited this review, including a lite review as references/depth.md words it>
 
 peer.outcome: <folded | in-process-fallback>
