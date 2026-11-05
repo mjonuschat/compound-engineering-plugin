@@ -66,6 +66,9 @@ An empty invoke picks the newest eligible implementation-ready code plan in `doc
 # Require that route (interactive standalone asks before weakening it)
 /ce-work only use Composer for implementation on docs/plans/2026-07-15-example.md
 
+# Loop the shipping review up to 3 rounds, then fold the fixes into the commits they belong to
+/ce-work rounds:3 fixups:on docs/plans/notification-mute.md
+
 # Outer orchestrator: implement and locally verify, then return a structured envelope
 /ce-work mode:return-to-caller docs/plans/notification-mute.md
 
@@ -126,6 +129,12 @@ When the plan defines U-IDs, they propagate as task prefixes, into commit messag
 ### Test evidence, review, and operational validation
 
 A task is not done when the code compiles. Before changing behavior, `ce-work` discovers the existing test files and chooses the right proof: use an existing failing test, update or strengthen the existing test that owns the contract, add a focused failing test, capture characterization coverage, or record a deliberate exception with replacement verification. Tests prove the behavior the unit builds: vague scenarios get made concrete, but a category the plan left out is not a gap to fill. Before marking a task complete, it traces two levels out for callbacks, middleware, and observers, and keeps the paths that already worked through them working.
+
+### Review rounds and fixup folding
+
+`rounds:N` (or `work_review_rounds` in the CE config) loops the shipping review. Each round runs `ce-code-review` with `depth:focused` over the whole branch plus the uncommitted fixes, so the independent peer read is attempted every round. The agent triages the blocking findings itself. Blocking means `P0` or `P1`. It fixes what is real and reachable, disputes what is theoretical, unreproducible, or already on the base, and records `P2` and `P3` findings without fixing them. The project's tests and lint run after every round, and a decisions file carries the dispositions into the next round's review. The loop stops when a review is clean, when every blocking finding was disputed or a disputed one returns (converged), or when the count is reached (exhausted). Unresolved blocking findings go to the Residual Work Gate. Every round sends the diff to the cross-model peer under the same disclosure as a single review, and each peer job starts fresh.
+
+`fixups:on` adds one more step, and it rewrites local history. Fixes stay uncommitted while the loop runs. When it ends, `scripts/review-fixups.py` maps each changed file to the commit that introduced the lines it touched, commits it as a `--fixup` of that commit, and autosquashes. Fixes no commit owns become one ordinary commit. The rewrite happens in a throwaway worktree, and the branch moves only if the final tree equals the pre-rewrite snapshot and the project's checks pass at every rewritten commit. If any commit in the range is already on a remote, the range has a merge commit, or `HEAD` is detached, nothing is rewritten and a normal fix commit is made. Files that were dirty before the work began are never touched.
 
 ### Building what was asked
 
@@ -305,6 +314,8 @@ Every CE Work runner start pins a two-hour hard cap independently of the shared 
 | `<plan path>` | Execute that plan. A requirements-only unified plan is refused until `ce-plan` enriches it. |
 | `<bare prompt>` | Triage by complexity (Trivial / Small-Medium / Large) |
 | `use Codex` / `with Cursor` / `only use Composer` | Request or require an external implementation author. The host still verifies, commits, and ships. |
+| `rounds:N` | Opt in to the review loop around the shipping review, `N` from 0 to 5. Wins over `work_review_rounds`. Ignored in `mode:return-to-caller` |
+| `fixups:on` | With `rounds:N`, fold the loop's fixes into the local commits they belong to when the loop ends. Off by default and has no config key |
 | `mode:return-to-caller <plan path>` | Outer-orchestrator use: implement and locally verify, then return structured evidence without the standalone shipping tail |
 | `mode:return-to-caller implementation_engine:<compact-json> <plan path>` | Automatic-caller form carrying one implementation-only `mode`, `target`, `model`, and `source` binding |
 | `implementation_run:<safe-id>` or `resume run <id>` | Resume, inspect, or clean up that existing external run. Does not start new work. |

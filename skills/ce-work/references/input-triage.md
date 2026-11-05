@@ -30,6 +30,18 @@ When `implementation_run:<safe-id>` is present, recovery wins over ordinary inpu
 
 When a valid `implementation_engine:` binding is present without recovery, **pre-controller discovery is read-only**. Do not run baseline, test, build, format, install, or generation commands in the canonical checkout before resolving the binding and initializing the external controller: those commands can create ignored or untracked artifacts before the controller records its clean starting point. Limit triage to reads such as metadata, source, configuration, branch, status, and command-availability probes. If a non-read probe is genuinely required to decide whether the route can start, run it only with artifact suppression and prove the canonical Git snapshot is byte-for-byte unchanged before continuing; otherwise stop with a route blocker.
 
+**Review-loop tokens.** `rounds:N` and `fixups:on` may lead the input in either order; strip them before any other classification. In Return-to-Caller Mode both are ignored and the config key below is not read, because the caller owns review. Otherwise resolve the round count from the first of these that is an integer 0 to 5 (0 means no loop): the `rounds:N` argument (0 turns the loop off for this run), then `work_review_rounds` from the CE config, then none. A value outside 0 to 5 is invalid; ignore it, say so in one line, and continue to the next source. Read the key as follows:
+
+<!-- ce-config-layers:start -->
+**Resolve ordinary CE yaml keys from the two repo files.**
+
+- **Read** `<repo-root>/.compound-engineering/config.local.yaml`, then `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`). Missing files are skipped. Gitignore does not change resolution.
+- **Win** with the first active (non-commented) value. For scalars, empty is unset; an invalid value continues to the next layer, then the skill default. For lists and maps, a present key — including an empty list or map — replaces the whole key.
+- **Do not** use this rule for `docs_root` — that key is `config.yaml` only.
+<!-- ce-config-layers:end -->
+
+`fixups:on` is honored only when the count is 1 or more; otherwise ignore it and say so. It is the only switch that lets a run rewrite history, and no config key sets it. When the count is 1 or more, `references/shipping-workflow.md` sends the review step to `references/review-rounds.md`.
+
 **Resolve a session-carried plan before blank or bare-prompt classification.** When the current request is continuation language such as "proceed" and the conversation identifies exactly one current plan for this work — a plan/spec path or an in-conversation brief from `ce-plan` — that was authored, selected, or accepted, treat it as `<input_document>`. A brief enters as a bare prompt with `source_kind: prompt`. If multiple session plans are plausible, ask which one; do not choose by recency. Do not replace a concrete new work request with an unrelated earlier plan. This rule depends only on visible conversation state, never on whether invocation was explicit or automatic.
 
 ## Source Classification

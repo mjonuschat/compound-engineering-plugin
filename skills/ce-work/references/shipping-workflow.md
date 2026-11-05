@@ -24,6 +24,8 @@ This file contains the shipping workflow (Phase 3-4). It is loaded when all Phas
 
    **Skip dedicated review only for a purely mechanical diff**: formatting, dependency-version bumps, lint-only fixes, generated artifacts (the same class step 2 skips for simplify), including multi-file mechanical-only diffs (e.g. package + lockfile, formatter across files). **Not mechanical:** behavior-bearing edits (single- or multi-file), control-flow / error-class / tests-for-behavior changes, or applying external or prior review findings. Note the exact skip phrase above. Everything else gets reviewed.
 
+   **Review loop.** When `references/input-triage.md` resolved a round count of 1 or more, read `references/review-rounds.md` now. It wraps steps 3a and 3b in a loop, and then you continue at the Residual Work Gate. The completion gate above applies to every round's receipt.
+
    **Review is not fix — two steps:**
 
    **3a. Review (read-only).** Invoke `ce-code-review` through the host's normal skill-invocation mechanism with `mode:agent` (add `plan:<path>` when known, plus `plan_group:<label>` when the diff builds one PR group of a multi-PR plan; `base:<ref>` when the diff base is resolved). Skill invocation means loading the cataloged skill definition and following it through that mechanism; `ce-code-review` does not require a separate executable, runner, or binary. Pass **`depth:full`** when the plan, the task, or the user explicitly asked for a full / deep / thorough review; that is the one escalation signal `ce-code-review` cannot infer from the diff alone. Do not pass `mode:autofix`. Parse the JSON and retain the receipt only when `status` is `complete` (plus `artifact_path` / `run_id`).
