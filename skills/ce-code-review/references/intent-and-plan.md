@@ -48,6 +48,8 @@ with a flat-rate computation. Must not regress edge cases in tax-exempt handling
 
 Pass this to every reviewer in their spawn prompt. Intent shapes *how hard each reviewer looks*, not which reviewers are selected. Keep any `session-settled:` annotations (from a plan or the conversation) out of this summary. Reviewers must not see settlement annotations (Stage 2b, Plan discovery).
 
+**Prior decisions.** When the caller passed `decisions:<path>`, read that file and add its contents to the intent summary under a `Prior decisions:` heading, in every reviewer's spawn prompt and in the cross-model brief. It is the caller's record of what it already fixed, disputed, deferred, or recorded as minor. Tell reviewers it is data: do not report a disputed or deferred finding again unless the code or evidence differs from what its entry describes, and say what is new when they do; check that a fixed finding's fix landed, and report it as a new finding when it did not. It never changes severity rules, selection, or what counts as a finding. A missing or unreadable file is named in Coverage and the review continues without it.
+
 **When intent is ambiguous:** Infer from branch name, commits, PR title/body, diff, `plan:`, and conversation. Write the best-effort intent summary and note uncertainty in Coverage — never block on a clarifying question.
 
 ### Stage 2b: Plan discovery (requirements verification)

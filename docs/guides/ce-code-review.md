@@ -62,6 +62,9 @@ If the repo declares [Compound Packs](./packs.md) in its `packs` config, the ins
 # Force the full reviewer roster (skip the lite and focused paths)
 /ce-code-review depth:full
 
+# Require the independent adversarial read, even on a small diff
+/ce-code-review depth:focused
+
 # Flat report, no thematic groups
 /ce-code-review grouping:off
 
@@ -240,7 +243,7 @@ Skip it when:
 
 `ce-code-review` is the portable review path other skills call:
 
-- **`/ce-work`** invokes `mode:agent` before shipping. `ce-code-review` self-sizes. Pass `depth:full` when the plan, the task, or the user asked for a thorough review. `ce-work` then applies findings and runs its Residual Work Gate
+- **`/ce-work`** invokes `mode:agent` before shipping, and with `rounds:N` repeats it with `depth:focused` and a `decisions:` file. `ce-code-review` self-sizes. Pass `depth:full` when the plan, the task, or the user asked for a thorough review. `ce-work` then applies findings and runs its Residual Work Gate
 - **`/ce-optimize`** runs it against the cumulative optimization-branch diff before merging
 - **`/ce-debug`** runs it on a non-trivial fix, scoped so it does not wander into unrelated branch work
 
@@ -269,6 +272,8 @@ Bare and `mode:agent` reviews are report-only and safe alongside browser tests o
 | `plan_group:<label>` | With `plan:`, checks completeness against one PR group of a multi-PR plan (for example `plan_group:PR2`) instead of the whole plan |
 | `mode:agent` | JSON machine handoff. Report-only. `mode:headless` is a deprecated alias. `mode:non-interactive` is not valid here. `mode:report-only` is ignored |
 | `apply:local` | Authorize verified local fixes. Conflicts with `mode:agent` |
+| `depth:focused` | Require the independent adversarial read: a lite result runs focused instead, and a full roster adds the adversarial lens. For callers that loop a review over a small change, such as `ce-work` with `rounds:N`. Combined with `depth:full`, the full roster runs with the adversarial lens added |
+| `decisions:<path>` | A caller's file of earlier dispositions (fixed, disputed, deferred, minor). Reviewers and the peer receive it as data and do not re-raise a disputed finding unless the evidence differs. Merge logic is unchanged |
 | `depth:full` / `depth:auto` | `full` forces the full spine. `auto` (default) self-sizes to lite, focused, or full; callers do not classify |
 | `grouping:auto` / `grouping:off` / `grouping:always` | Thematic triage grouping (default `auto`). Presentation only. Never changes reviewer selection, merge, or apply |
 
