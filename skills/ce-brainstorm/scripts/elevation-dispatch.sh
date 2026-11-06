@@ -31,7 +31,13 @@ RUN_SUCCEEDED=false
 
 log() { printf '[elevation] %s\n' "$*" >&2; }
 
-EFFORT="high"   # settled: elevation runs at high effort
+# Elevation runs at high effort unless the orchestrator passes a valid override
+# resolved from plan_effort / brainstorm_effort. An unrecognized value is ignored,
+# never guessed, so the documented default always holds.
+EFFORT="high"
+case "${CE_ELEVATION_EFFORT:-}" in
+  low|medium|high|xhigh|max) EFFORT="$CE_ELEVATION_EFFORT" ;;
+esac
 
 # Read-only tool posture: the available built-in set, not a denylist. The
 # elevated step reads the repo (Read/Glob/Grep) and may check current facts on

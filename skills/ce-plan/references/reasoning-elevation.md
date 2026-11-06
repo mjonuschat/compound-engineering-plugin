@@ -16,6 +16,16 @@ Resolve the per-skill **model choice immediately before adapter selection**, so 
 
 **Precedence: latest explicit live user intent, then caller carrier, then config.** In pipeline / `disable-model-invocation` runs, where there is no live user dialogue, resolution is caller-carrier-then-config. Nothing elevates without one of those sources.
 
+### Effort
+
+Elevation runs at **`high`** effort unless an effort is resolved. Resolve it with the same precedence as the model: latest explicit user intent (e.g. "plan with opus at max effort"), then config. Config keys are `plan_effort` for ce-plan and `brainstorm_effort` for ce-brainstorm, read the same way as the model key. Valid values are `low`, `medium`, `high`, `xhigh`, `max`; a missing, commented, or invalid value means `high`. Effort never selects or changes the model, and it never activates elevation by itself.
+
+Apply the resolved effort on every route that can honor it:
+
+- **Native route:** where the subagent primitive accepts a thinking level, pass it with the model (on Pi, append it as a suffix: `model: "<alias>:<effort>"`, e.g. `opus:high`). A primitive with no such control runs at its own default; record the effort as unapplied rather than claiming it.
+- **Claude CLI route:** export `CE_ELEVATION_EFFORT=<effort>` on the `start` command beside the other `CE_*` variables; the worker passes it as `--effort`. Unset keeps `high`.
+- **Inline route:** the session model's own effort applies; nothing is set.
+
 If the session model already **is** the resolved model, there is nothing to elevate: skip dispatch (see Transparency for whether a line is still printed).
 
 ## Adapter selection
@@ -79,14 +89,14 @@ PY="$(for c in python3 python py; do command -v "$c" >/dev/null 2>&1 && "$c" -c 
    SKILL_DIR="<absolute path of the directory containing the SKILL.md you just read — this skill's own directory>";
    PY="$(for c in python3 python py; do command -v "$c" >/dev/null 2>&1 && "$c" -c '' >/dev/null 2>&1 && { echo "$c"; break; }; done)"; [ -n "$PY" ] || { echo "no working Python 3 interpreter on PATH" >&2; exit 1; };
    SKILL_NAME="<this skill's name: ce-plan or ce-brainstorm>";
-   CE_PEER_HARD_SECS=5400 CE_ELEVATION_HARD_SECS=5400 CE_PEER_LOG_MAX_BYTES=52428800 \
+   CE_PEER_HARD_SECS=5400 CE_ELEVATION_HARD_SECS=5400 CE_PEER_LOG_MAX_BYTES=52428800 CE_ELEVATION_EFFORT="<effort>" \
      "$PY" "$SKILL_DIR/scripts/peer-job-runner.py" start \
      --skill "$SKILL_NAME" --run-id "<run-id>" --label elevation \
      --result-path "<result-path>" \
      -- bash "$SKILL_DIR/scripts/elevation-dispatch.sh" "<model>" "<prompt-file>" "<result-path>"
    ```
 
-`CE_PEER_HARD_SECS` (the outer runner cap) and `CE_ELEVATION_HARD_SECS` (the worker's own inner cap) are set to the **same** raised backstop well above any legitimate run — keep them equal so the inner cap never reaps a healthy run before the outer one. `CE_PEER_LOG_MAX_BYTES` is raised for the streaming route so a healthy high-volume run is not reaped as a failure. `start` returns a job id in under ~2s.
+`CE_PEER_HARD_SECS` (the outer runner cap) and `CE_ELEVATION_HARD_SECS` (the worker's own inner cap) are set to the **same** raised backstop well above any legitimate run — keep them equal so the inner cap never reaps a healthy run before the outer one. `CE_PEER_LOG_MAX_BYTES` is raised for the streaming route so a healthy high-volume run is not reaped as a failure. Omit `CE_ELEVATION_EFFORT` when no effort resolved; the worker then runs at `high`. `start` returns a job id in under ~2s.
 
 3. **Poll** between your other work until the job reaches a terminal state (resolve `$PY` again — each tool call is a fresh shell):
 
@@ -119,6 +129,6 @@ Recovery **never substitutes a different model** — a plan the user believes ca
 
 ## Transparency
 
-- **Elevation ran** → print one line naming the **model**, the **route**, and **why** it ran (config key, explicit user instruction, or caller carrier). Name the model as **served** when a receipt confirms it; otherwise name it as **requested** with an explicit *unverified* marker — on every route, including native.
+- **Elevation ran** → print one line naming the **model**, the **effort** (marked *unapplied* when the route could not set it), the **route**, and **why** it ran (config key, explicit user instruction, or caller carrier). Name the model as **served** when a receipt confirms it; otherwise name it as **requested** with an explicit *unverified* marker — on every route, including native.
 - **Print no line** when elevation did not run, and when the session model already is the model a **config key** requested. An **explicit user instruction** always produces a line, including when the session model already matches (so a recognized request is never indistinguishable from an unparsed one).
 - **Requested but unavailable before provider-capable dispatch** (no native support, `claude` absent, or the required launch permission unavailable) → run the step inline on the session model, name **which routing precondition was unmet**, and state what would make the requested model reachable. Once provider-capable dispatch is established, an authentication failure is instead a route-level Recovery outcome: name the observed authentication failure and the login or credential-refresh remediation.

@@ -73,6 +73,8 @@
 
 # plan_model: fable              # model alias for plan authoring; candidate preference when a Bake-off runs (no default)
 # brainstorm_model: fable        # model alias for approach generation; candidate preference when a Bake-off runs (no default)
+# plan_effort: high              # low | medium | high | xhigh | max (default: high); reasoning effort of the elevated plan step
+# brainstorm_effort: high        # low | medium | high | xhigh | max (default: high); reasoning effort of the elevated approach step
 
 # --- PR concept teaching (ce-commit-push-pr) ---
 # When a PR introduces a concept new to the codebase, the generated PR
